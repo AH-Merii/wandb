@@ -32,6 +32,12 @@ func NewDefaultFileTransfer(
 	logger *observability.CoreLogger,
 	fileTransferStats FileTransferStats,
 ) *DefaultFileTransfer {
+	logger.Info("pinglei: NewDefaultFileTransfer with disable keep alives")
+	tr := http.DefaultTransport.(*http.Transport).Clone()
+	tr.DisableKeepAlives = true
+	client.HTTPClient = &http.Client{
+		Transport: tr,
+	}
 	fileTransfer := &DefaultFileTransfer{
 		logger:            logger,
 		client:            client,
@@ -42,6 +48,8 @@ func NewDefaultFileTransfer(
 
 // Upload uploads a file to the server
 func (ft *DefaultFileTransfer) Upload(task *DefaultUploadTask) error {
+	ft.logger.Info("pinglei: Updated Upload logic in core")
+
 	ft.logger.Debug("default file transfer: uploading file", "path", task.Path, "url", task.Url)
 
 	// open the file for reading and defer closing it
