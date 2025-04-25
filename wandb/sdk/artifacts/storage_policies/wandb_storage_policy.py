@@ -168,15 +168,16 @@ class WandbStoragePolicy(StoragePolicy):
 
         if manifest_entry._download_url is not None:
             # Use multipart parallel download for large file
-            if executor is not None and self._should_multipart_download(
-                manifest_entry.size, multipart
-            ):
-                self._multipart_file_download(
-                    executor,
-                    manifest_entry._download_url,
-                    manifest_entry.size,
-                    cache_open,
-                )
+            if self._should_multipart_download(manifest_entry.size, multipart):
+                # TODO: Switch to thread pool executor base on GCP SDK
+                # Seems this allow using different hosts to improve throughput
+                with concurrent.futures.ProcessPoolExecutor(max_workers=10) as executor:
+                    self._multipart_file_download(
+                        executor,
+                        manifest_entry._download_url,
+                        manifest_entry.size,
+                        cache_open,
+                    )
                 return path
             # Serial download
             response = self._session.get(manifest_entry._download_url, stream=True)
