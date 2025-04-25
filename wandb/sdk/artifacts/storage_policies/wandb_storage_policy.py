@@ -104,8 +104,8 @@ class WandbStoragePolicy(StoragePolicy):
         self._session = requests.Session()
         adapter = requests.adapters.HTTPAdapter(
             max_retries=_REQUEST_RETRY_STRATEGY,
-            pool_connections=_REQUEST_POOL_CONNECTIONS,
-            pool_maxsize=_REQUEST_POOL_MAXSIZE,
+            pool_connections=0,
+            pool_maxsize=0,
         )
         self._session.mount("http://", adapter)
         self._session.mount("https://", adapter)
@@ -263,8 +263,8 @@ class WandbStoragePolicy(StoragePolicy):
 
         # TODO: Create a new session to avoid keep alive and connection reuse.
         # this would allow us to connect to more hosts to get better throughput.
-        session = requests.Session()
-        response = session.get(
+        # session = requests.Session()
+        response = self._session.get(
             url=download_url,
             headers=headers,
             stream=True,
