@@ -93,6 +93,12 @@ func Relative(path string) (*RelativePath, error) {
 	return toPtr(RelativePath(filepath.Clean(path))), nil
 }
 
+// Join appends a relative path to an absolute path.
+func (path1 AbsolutePath) Join(path2 RelativePath) AbsolutePath {
+	// NOTE: filepath.Join() calls Clean() on the result.
+	return AbsolutePath(filepath.Join(path1.OrEmpty(), path2.OrEmpty()))
+}
+
 // RelativeTo returns an equivalent path that is relative to the given path.
 //
 // On Unix, this will always succeed. On Windows, this may fail if the paths
